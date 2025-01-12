@@ -16,22 +16,23 @@ double start, end; // Start and end timing of process
 void* thr_fn(void *arg) {
     int k = *((int*) arg); // Current rank of this thread
     int x, y; // Current row, col of the process block
-    x = floor(k/Ps);
-    y = (k%Ps)*(k%Ps);
+
+    // from page 2 of manual
+    int x = floor(k / Ps);
+    y = (k%Ps)*(k%Ps); // Shammir: I am still confuse about this one.
     
-    for (int i = 0; i < n; i++) {
-        for (int j = 0; j < n; j++) {
-            if (
-                (n/Ps)*x <= i && i <= (n/Ps)*(x+1)-1
-                &&
-                (n/Ps)*y <= j && j <= (n/Ps)*(y+1)-1
-            )
-            {
-                for (int r = 0; r < n-1; r++) {
-                    C[i][j] += A[i][r] * B[r][j];
-                }
+    // calculate the range of rows and columns (from page 2 of manual)
+    int row_start = x * (n / Ps);
+    int row_end = (x + 1) * (n / Ps);
+    int col_start = y * (n / Ps);
+    int col_end = (y + 1) * (n / Ps);
+
+    // Perform matrix multiplication for this block
+    for (int i = row_start; i < row_end; i++) {
+        for (int j = col_start; j < col_end; j++) {
+            for (int r = 0; r < n; r++) { // Full row-column multiplication
+                C[i][j] += A[i][r] * B[r][j];
             }
-            else continue;
         }
     }
 
@@ -53,14 +54,17 @@ int main(int argc, char *argv[]) {
     GET_TIME(start);
 
     // implementation of the matrix multiplication here
-    P = n*n;
-    Ps = n;
-    pthread_t threads[P];
+    P = P = atoi(argv[1]);
+    Ps = sqrt(P);
 
+    pthread_t threads[P];
+    int *thread_ranks = malloc(P * sizeof(int));
     for (int r = 0; r < P; r++) {
-        if (pthread_create(&threads[r], NULL, thr_fn, (void*) &r) != 0) {
-            fprintf(stderr, "Cannot create thread %d!\n", r);
-        } 
+        thread_ranks[r] = r;
+        if (pthread_create(&threads[r], NULL, thr_fn, &thread_ranks[r]) != 0) {
+            fprintf(stderr, "Cannot create thread %d.\n", r);
+            exit(EXIT_FAILURE);
+        }
     }
 
     // Wait for all thread to terminate
@@ -85,4 +89,5 @@ int main(int argc, char *argv[]) {
     free(A);
     free(B);
     free(C);
+    free(thread_ranks);
 }
