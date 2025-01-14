@@ -2,12 +2,13 @@
 #include <stdlib.h>
 #include <pthread.h>
 #include <math.h>
+#include <string.h>
 #include "timer.h"
 #include "lab1_IO.h"
 
 int P, Ps; // Number of thread and its square root
 int **A, **B, **C; // Matrix A, B, and C
-int n; // Size of the matrics
+int n; // Size of the matrices
 double start, end; // Start and end timing of process
 
 /* The thread function
@@ -40,7 +41,7 @@ void* thr_fn(void *arg) {
     return NULL; // To make very damn sure that the thread terminate
 }
 
-int main(int argc, char *argv[]) {
+int main(int argv, char *argc[]) {
 
     // used the helper function from lab1_IO.h to load input
     Lab1_loadinput(&A, &B, &n);
@@ -57,8 +58,34 @@ int main(int argc, char *argv[]) {
     GET_TIME(start);
 
     // implementation of the matrix multiplication here
-    P = n*n; // P = n^2 for now for simplification
-    Ps = n; // sqrt(P) = n
+    if (argv == 1) P = n*n; // By default
+    else {
+        if (argv != 2) {
+            fprintf(stderr, "Expect either 0 or 1 argument!\n");
+            exit(EXIT_FAILURE);
+        }
+        
+        char *endptr;
+        if ((P = (int) strtol(argc[1], &endptr, 10)) == 0 || *endptr != '\0') {
+            fprintf(stderr, "\'%s\' is not a valid argument. Must be an int that is > 0\n", argc[1]);
+            exit(EXIT_FAILURE);
+        }
+    }
+    Ps = sqrt(P); // sqrt(P) = n
+
+    // Check if P perfectly divides n^2 and is perfect square
+    if (P < 0) {
+        fprintf(stderr, "P must be positive!\n");
+        exit(EXIT_FAILURE);
+    }
+    if ((n*n) % P != 0) {
+        fprintf(stderr, "P must perfectly divides n^2!\n");
+        exit(EXIT_FAILURE);
+    }
+    if (P != Ps*Ps) {
+        fprintf(stderr, "P must be a perfect square number!\n");
+        exit(EXIT_FAILURE);
+    }
 
     pthread_t threads[P];
     int thread_ranks[P];

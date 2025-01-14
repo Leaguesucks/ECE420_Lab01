@@ -24,9 +24,10 @@ int main() {
     srand(time(NULL));
 
     int N, bound;
-    const int N_lim = 150; // Bound for number n (Recommend max 150 else you might blow up something)
+    const int N_lim = 120; // Bound for number n (Recommend max 120 else you might blow up something)
     const int bound_lim = 100000; // Bound for matrix bound (Recommend max 100,000 to avoid overflow)
     const int tnum = 100; // Number of test cases (Recommend max 100 else you will be wasting time and might blow up something)
+    const int threads = 15180; // Recommend max number of thread to be created (atleast on my machine)
 
     int **A, **B;
     int n;

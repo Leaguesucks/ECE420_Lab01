@@ -1,13 +1,13 @@
 all: matrixgen main test
 
 test: test.o lab1_IO.o
-	gcc -Wall -pthread -g test.o lab1_IO.o -o test
+	gcc -Wall -pthread -g test.o lab1_IO.o -o test -lm
 
 test.o: lab1_IO.h timer.h
 	gcc -Wall -pthread -g -c test.c -o test.o
 
 main: main.o lab1_IO.o
-	gcc -Wall -pthread -g main.o lab1_IO.o -o main
+	gcc -Wall -pthread -g main.o lab1_IO.o -o main -lm
 
 main.o: lab1_IO.h timer.h
 	gcc -Wall -pthread -g -c main.c -o main.o

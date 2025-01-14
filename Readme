@@ -18,3 +18,24 @@ Overview:
 =====
 Please also find the details instructions in the comments of the individual files.
 
+=====
+Contributors:
+    Dang Nguyen <dpn>
+
+=====
+Files
+
+-----
+    Makefile
+        make all: compile matrixgen.c, main.c and test.c to          executables
+        make clean: remove all .o files, all executable and data_input, data_output files
+        make clean1: remove only data_input and data_output files, might be useful for debugging
+
+-----
+    main.c: 
+        Main program to perform the parallel matrix multiplication.
+        Execute as: ./main
+
+-----
+    test.c:
+        A test program that generate test cases to verify main.c
