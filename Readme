@@ -39,3 +39,4 @@ Files
 -----
     test.c:
         A test program that generate test cases to verify main.c
+        Execute as: ./test

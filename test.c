@@ -6,33 +6,39 @@
  * 
  * HOW IT WORKS!?: The program will generate upto tnum test cases, 
  *                  each test case will generate matrix size n and
- *                  the bound randomly in the range of (0, N_lim/bound_lim].
+ *                  the bound randomly in the range of (0, threads/bound_lim].
  *                  It will then execute ./matrixgen -s n -b bound and
  *                  ./main then compare the data in data_output produced
  *                  by main.c to the result computed by using sequential
  *                  matrix multiplication.
+ * 
+ * NOTE: Test cases where P != n^2 are highlighted in yellow
  */
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <time.h>
+#include <unistd.h>
 #include "timer.h"
 #include "lab1_IO.h"
 
 int main() {
     srand(time(NULL));
 
-    int N, bound;
-    const int N_lim = 120; // Bound for number n (Recommend max 120 else you might blow up something)
+    unsigned int p, P, Nsq, N, bound;
+    unsigned int mul;
+
     const int bound_lim = 100000; // Bound for matrix bound (Recommend max 100,000 to avoid overflow)
     const int tnum = 100; // Number of test cases (Recommend max 100 else you will be wasting time and might blow up something)
     const int threads = 15180; // Recommend max number of thread to be created (atleast on my machine)
+    const int th_sqrt = 123; // Square root of max num of thread
 
     int **A, **B;
     int n;
 
-    char mgen[50];
+    char mgen[50], mexe[50];
     FILE *op;
 
     int e; // Hold each C[i][j] perform by sequential matrix multiplication
@@ -42,17 +48,40 @@ int main() {
     sleep(3);
 
     for (int t = 0; t < tnum; t++) {
-        N = rand() % N_lim + 1; // Generate random n in range (0, N_lim]
+        p = rand() % th_sqrt + 1; // Generate a random base multiplier in range (0, th_sqrt]
+        P = p*p; // Make sure P is perfect square
         bound = rand() % bound_lim + 1; // Generate random bound in range (0, bound_lim]
-        printf("Test Case %d starts: n = %d, bound = %d\n", t, N, bound);
+        mul = rand() % 1000 + 1;
 
-        // Execute matrixgen and main.c
-        sprintf(&mgen, "./matrixgen -s %d -b %d", N, bound);
-        if (system(&mgen) == -1) {
-            fprintf(stderr, "Cannot execute %s!\n", &mgen);
+        // Generate N^2
+        Nsq = 1;
+        for (int i = 0; i < mul; i++) { // Make sure P perfectly divides n^2
+            Nsq *= P;
+            if (Nsq > threads) {
+                Nsq /= P;
+                break;
+            }
+        }
+        N = sqrt(Nsq);
+        
+        /* Safe guard code to protect my laptop from nuking itself */
+        if (N > 150) {
+            printf("Sonething went wrong: Nsq = %d, N = %d, P = %d\n", Nsq, N, P);
             exit(EXIT_FAILURE);
         }
-        if (system("./main") == -1) {
+
+        if (Nsq != P) printf("\033[0;33m"); // Switch to yellow text
+        printf("Test Case %d starts: n = %d, bound = %d, P = %d\n", t, N, bound, P);
+        printf("\033[0;37m"); // Reset to white text
+
+        // Execute matrixgen and main.c
+        sprintf(mgen, "./matrixgen -s %d -b %d", N, bound);
+        if (system(mgen) == -1) {
+            fprintf(stderr, "Cannot execute %s!\n", mgen);
+            exit(EXIT_FAILURE);
+        }
+        sprintf(mexe, "./main %d", P);
+        if (system(mexe) == -1) {
             fprintf(stderr, "Cannot execute main!\n");
             exit(EXIT_FAILURE);
         }
@@ -121,7 +150,10 @@ int main() {
         }
 
         // Reset the stack and free any allocated memory
-        for (int i = 0; i < 50; i++) mgen[i] = '\0';
+        for (int i = 0; i < 50; i++) {
+            mgen[i] = '\0';
+            mexe[i] = '\0';
+        }
         for (int i = 0; i < N; i++) {
             free(A[i]);
             free(B[i]);
