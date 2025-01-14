@@ -18,8 +18,8 @@ void* thr_fn(void *arg) {
     int x, y; // Current row, col of the process block
 
     // from page 2 of manual
-    int x = floor(k / Ps);
-    y = (k%Ps)*(k%Ps); // Shammir: I am still confuse about this one.
+    x = floor(k / Ps);
+    y = (k%Ps);
     
     // calculate the range of rows and columns (from page 2 of manual)
     int row_start = x * (n / Ps);
@@ -49,16 +49,19 @@ int main(int argc, char *argv[]) {
     C = malloc(n * sizeof(int *));
     for (int i = 0; i < n; i++) {
         C[i] = malloc(n * sizeof(int));
+        for (int j = 0; j < n; j++) { // Initialize all C[i][j] to 0
+            C[i][j] = 0;
+        }
     }
 
     GET_TIME(start);
 
     // implementation of the matrix multiplication here
-    P = P = atoi(argv[1]);
-    Ps = sqrt(P);
+    P = n*n; // P = n^2 for now for simplification
+    Ps = n; // sqrt(P) = n
 
     pthread_t threads[P];
-    int *thread_ranks = malloc(P * sizeof(int));
+    int thread_ranks[P];
     for (int r = 0; r < P; r++) {
         thread_ranks[r] = r;
         if (pthread_create(&threads[r], NULL, thr_fn, &thread_ranks[r]) != 0) {
@@ -89,5 +92,4 @@ int main(int argc, char *argv[]) {
     free(A);
     free(B);
     free(C);
-    free(thread_ranks);
 }

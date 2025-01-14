@@ -14,3 +14,7 @@ matrixgen:
 
 clean:
 	rm *.o matrixgen main data_input data_output
+
+# Only remove data_input and data_output. Might be useful for debug
+clean1:
+	rm data_input data_output
