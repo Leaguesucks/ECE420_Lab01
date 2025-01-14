@@ -34,7 +34,7 @@ Files
 -----
     main.c: 
         Main program to perform the parallel matrix multiplication.
-        Execute as: ./main
+        Execute as: ./main <number of thread> default: P = n^2
 
 -----
     test.c:
