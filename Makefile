@@ -24,3 +24,6 @@ clean:
 # Only remove data_input and data_output. Might be useful for debug
 clean1:
 	rm data_input data_output
+
+zip:
+	zip ECE420_Lab01.zip *.c *.h Makefile Readme
