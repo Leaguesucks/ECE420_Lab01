@@ -29,10 +29,10 @@ void* thr_fn(void *arg) {
     int col_end = (y + 1) * (n / Ps);
 
     // Perform matrix multiplication for this block
-    for (int i = row_start; i < row_end; i++) {
-        for (int j = col_start; j < col_end; j++) {
+    for (int i = row_start; i < row_end; i++) { // iterate over all the rows in matrix A
+        for (int j = col_start; j < col_end; j++) {  // iterate over all the blocks in matrix B
             for (int r = 0; r < n; r++) { // Full row-column multiplication
-                C[i][j] += A[i][r] * B[r][j];
+                C[i][j] += A[i][r] * B[r][j]; 
             }
         }
     }
